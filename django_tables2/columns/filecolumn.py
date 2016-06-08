@@ -33,9 +33,15 @@ class FileColumn(Column):
             If *verify_exists*, the HTML class ``exists`` or ``missing`` is
             added to the element to indicate the integrity of the storage.
     """
-    def __init__(self, verify_exists=True, **kwargs):
+    def __init__(self, verify_exists=True, text=None, **kwargs):
         self.verify_exists = True
+        self.text = text
         super(FileColumn, self).__init__(**kwargs)
+
+    def text_value(self, value):
+        if self.text is None:
+            return os.path.basename(value.name)
+        return self.text
 
     def render(self, value):
         storage = getattr(value, 'storage', None)
@@ -69,7 +75,7 @@ class FileColumn(Column):
             '<{tag} {attrs}>{text}</{tag}>',
             tag=tag,
             attrs=attrs.as_html(),
-            text=os.path.basename(value.name)
+            text=self.text_value(value)
         )
 
     @classmethod
